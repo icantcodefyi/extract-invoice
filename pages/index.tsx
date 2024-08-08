@@ -7,6 +7,14 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { InvoiceData } from '@/utils/types';
 
+export const config = {
+  api: {
+    bodyParser: false,
+    externalResolver: true,
+  },
+  maxDuration: 30,
+};
+
 const InvoiceUpload = () => {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
