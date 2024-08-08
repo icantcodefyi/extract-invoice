@@ -42,7 +42,9 @@ async function extractInvoiceData(data: string): Promise<z.infer<typeof InvoiceS
 export const config = {
   api: {
     bodyParser: false,
+    externalResolver: true,
   },
+  maxDuration: 30,
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

@@ -106,14 +106,14 @@ const InvoiceCard = ({ invoiceData }: { invoiceData: InvoiceData }) => {
             <ul className="list-disc list-inside">
               {invoiceData.products.map((product, index) => (
                 <li key={index}>
-                  {product.name} - Quantity: {product.quantity}, Price: ${product.price.toFixed(2)}
+                  {product.name} - Quantity: {product.quantity}, Price: ₹{product.price.toFixed(2)}
                 </li>
               ))}
             </ul>
           </div>
           <div>
             <h3 className="font-semibold">Total Amount</h3>
-            <p>${invoiceData.totalAmount.toFixed(2)}</p>
+            <p>₹{invoiceData.totalAmount.toFixed(2)}</p>
           </div>
         </div>
       </CardContent>
