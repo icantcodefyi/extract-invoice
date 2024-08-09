@@ -10,4 +10,5 @@ export interface InvoiceData {
     customerEmail?: string;
     products: Product[];
     totalAmount: number;
+    currency: string;
 }

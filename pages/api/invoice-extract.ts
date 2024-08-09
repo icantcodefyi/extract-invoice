@@ -27,6 +27,7 @@ const InvoiceSchema = z.object({
   customerEmail: z.string().optional(),
   products: z.array(ProductSchema),
   totalAmount: z.number(),
+  currency: z.string().default("INR"), // Add currency field with default value INR
 });
 
 async function extractInvoiceData(data: string): Promise<z.infer<typeof InvoiceSchema>> {
@@ -60,17 +61,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ error: 'Error parsing form data' });
     }
 
-    let file = files.pdf as File | File[];
+    let file = files.file as File | File[];
     if (Array.isArray(file)) {
       file = file[0];
     }
     if (!file || !file.filepath) {
-      return res.status(400).json({ error: 'No PDF file uploaded or invalid file' });
+      return res.status(400).json({ error: 'No file uploaded or invalid file' });
     }
 
     try {
-      const pdfText = await extractTextFromFile(file.filepath);
-      const invoiceData = await extractInvoiceData(pdfText);
+      const fileText = await extractTextFromFile(file.filepath, file.mimetype || '');
+      const invoiceData = await extractInvoiceData(fileText);
 
       res.status(200).json({ response: invoiceData });
     } catch (error) {

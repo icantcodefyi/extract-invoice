@@ -22,10 +22,10 @@ const InvoiceUpload = () => {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
-    if (selectedFile && selectedFile.type === 'application/pdf') {
+    if (selectedFile && (selectedFile.type === 'application/pdf' || selectedFile.type.startsWith('image/'))) {
       setFile(selectedFile);
     } else {
-      alert('Please select a PDF file');
+      alert('Please select a PDF or image file');
       event.target.value = '';
     }
   };
@@ -37,7 +37,7 @@ const InvoiceUpload = () => {
     }
     setLoading(true);
     const formData = new FormData();
-    formData.append('pdf', file);
+    formData.append('file', file);
 
     try {
       const response = await fetch('/api/invoice-extract', {
@@ -59,9 +59,14 @@ const InvoiceUpload = () => {
     }
   };
 
+  const handleTryAgain = () => {
+    setFile(null);
+    setInvoiceData(null);
+  };
+
   return (
     <div className='min-h-screen flex justify-center items-center'>
-      {!invoiceData && (
+      {!invoiceData ? (
         <Card className="w-[350px] m-2 bg-inherit border-zinc-700">
           <CardHeader>
             <CardTitle>Invoice Upload</CardTitle>
@@ -69,8 +74,8 @@ const InvoiceUpload = () => {
           <CardContent>
             <div className="grid w-full items-center gap-4">
               <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="pdf">Upload PDF</Label>
-                <Input id="pdf" type="file" accept=".pdf" onChange={handleFileChange} />
+                <Label htmlFor="file">Upload PDF or Image</Label>
+                <Input id="file" type="file" accept=".pdf,image/*" onChange={handleFileChange} />
               </div>
             </div>
           </CardContent>
@@ -81,11 +86,19 @@ const InvoiceUpload = () => {
             </Button>
           </CardFooter>
         </Card>
+      ) : (
+        <div className="flex flex-col items-center">
+          <InvoiceCard invoiceData={invoiceData} />
+          <Button onClick={handleTryAgain} className="mt-4">
+            Try Another Invoice
+          </Button>
+        </div>
       )}
-      {invoiceData && <InvoiceCard invoiceData={invoiceData} />}
     </div>
   );
 };
+
+export default InvoiceUpload;
 
 const InvoiceCard = ({ invoiceData }: { invoiceData: InvoiceData }) => {
   return (
@@ -106,7 +119,7 @@ const InvoiceCard = ({ invoiceData }: { invoiceData: InvoiceData }) => {
             <ul className="list-disc list-inside">
               {invoiceData.products.map((product, index) => (
                 <li key={index}>
-                  {product.name} - Quantity: {product.quantity}, Price: ₹{product.price.toFixed(2)}
+                  {product.name} - Quantity: {product.quantity}, Price: {invoiceData.currency} {product.price.toFixed(2)}
                 </li>
               ))}
             </ul>
@@ -120,5 +133,3 @@ const InvoiceCard = ({ invoiceData }: { invoiceData: InvoiceData }) => {
     </Card>
   );
 };
-
-export default InvoiceUpload;
