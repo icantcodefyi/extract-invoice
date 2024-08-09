@@ -19,7 +19,9 @@ export async function extractTextFromFile(filePath: string, mimeType: string): P
       });
     });
   } else if (mimeType.startsWith('image/')) {
-    const { data: { text } } = await Tesseract.recognize(filePath, 'eng');
+    const { data: { text } } = await Tesseract.recognize(filePath, 'eng', {
+      corePath: '/tesseract-core-simd.wasm',
+    });
     console.log(text);
     return text;
   } else {
