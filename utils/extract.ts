@@ -1,29 +1,48 @@
 import fs from 'fs';
 import pdf from 'pdf-parse';
 import { createWorker } from "tesseract.js";
+import path from 'path';
 
-export async function extractTextFromFile(filePath: string, mimeType: string): Promise<string> {
+export async function extractTextFromFile(
+  filePath: string, 
+  mimeType: string, 
+  setStatus: (status: string) => void = () => {}
+): Promise<string> {
+  // Vercel function hack
+  const vercelFunctionHack = path.resolve('./public', '');
+
+  setStatus('Starting text extraction...');
+
   if (mimeType === 'application/pdf') {
     return new Promise((resolve, reject) => {
-      fs.readFile(filePath, (err, buffer) => {
+      fs.readFile(filePath, async (err, buffer) => {
         if (err) {
           reject(new Error(`Error reading file: ${err.message}`));
           return;
         }
 
-        pdf(buffer).then((data: { text: string | PromiseLike<string>; }) => {
+        try {
+          setStatus('Parsing PDF...');
+          const data = await pdf(buffer);
+          setStatus('PDF parsed successfully');
           resolve(data.text);
-        }).catch((error: { message: any; }) => {
+        } catch (error: any) {
           reject(new Error(`Error parsing PDF: ${error.message}`));
-        });
+        }
       });
     });
   } else if (mimeType.startsWith('image/')) {
-    const worker = await createWorker('eng');
-    const { data: { text } } = await worker.recognize(filePath);
-    await worker.terminate();
-    console.log(text);
-    return text;
+    try {
+      setStatus('Initializing OCR...');
+      const worker = await createWorker('eng');
+      setStatus('Performing OCR...');
+      const { data: { text } } = await worker.recognize(filePath);
+      await worker.terminate();
+      setStatus('OCR completed successfully');
+      return text;
+    } catch (error: any) {
+      throw new Error(`Error performing OCR: ${error.message}`);
+    }
   } else {
     throw new Error('Unsupported file type');
   }
