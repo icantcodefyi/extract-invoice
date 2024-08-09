@@ -1,6 +1,6 @@
 import fs from 'fs';
 import pdf from 'pdf-parse';
-import Tesseract from 'tesseract.js';
+import { createWorker } from "tesseract.js";
 
 export async function extractTextFromFile(filePath: string, mimeType: string): Promise<string> {
   if (mimeType === 'application/pdf') {
@@ -19,7 +19,9 @@ export async function extractTextFromFile(filePath: string, mimeType: string): P
       });
     });
   } else if (mimeType.startsWith('image/')) {
-    const { data: { text } } = await Tesseract.recognize(filePath, 'eng');
+    const worker = await createWorker('eng');
+    const { data: { text } } = await worker.recognize(filePath);
+    await worker.terminate();
     console.log(text);
     return text;
   } else {
