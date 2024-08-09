@@ -1,6 +1,6 @@
 import fs from 'fs';
 import pdf from 'pdf-parse';
-import { createWorker } from 'tesseract.js';
+import Tesseract from 'tesseract.js';
 
 export async function extractTextFromFile(filePath: string, mimeType: string): Promise<string> {
   if (mimeType === 'application/pdf') {
@@ -19,9 +19,8 @@ export async function extractTextFromFile(filePath: string, mimeType: string): P
       });
     });
   } else if (mimeType.startsWith('image/')) {
-    const worker = await createWorker('eng');
-    const { data: { text } } = await worker.recognize(filePath);
-    await worker.terminate();
+    const { data: { text } } = await Tesseract.recognize(filePath);
+    console.log(text);
     return text;
   } else {
     throw new Error('Unsupported file type');
