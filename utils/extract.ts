@@ -19,9 +19,13 @@ export async function extractTextFromFile(filePath: string, mimeType: string): P
       });
     });
   } else if (mimeType.startsWith('image/')) {
-    const { data: { text } } = await Tesseract.recognize(filePath, 'eng');
-    console.log(text);
-    return text;
+    return Tesseract.recognize(
+      filePath,
+      'eng',
+    ).then(({ data: { text } }) => {
+      console.log(text);
+      return text;
+    });
   } else {
     throw new Error('Unsupported file type');
   }
